@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โปรแกรมประเมินต้นทุนและผลตอบแทน การเลี้ยงปลานิลแดงในกระชัง</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --card-bg: #e6f4f1;
+            --text-dark: #1a365d;
+            --input-bg: #ffffff;
+            --result-bg: #e6f4f1;
+            --result-highlight: #7ac1b5;
+            --primary-color: #ffd700;
+            --accent-color: #e74c3c;
+            --btn-add: #3498db;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: linear-gradient(135deg, #053323 0%, #0d543e 35%, #1a8f66 50%, #0d543e 65%, #04291c 100%);
+            background-attachment: fixed;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 2% 5%; 
+            min-height: 100vh;
+            font-size: 16px; 
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            color: #ffffff;
+            font-size: 2.8em;
+            margin: 0 0 10px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.3;
+        }
+
+        .header h1 span { color: var(--primary-color); }
+
+        .header h3 {
+            color: #e0f7fa;
+            font-size: 1.4em;
+            font-weight: 400;
+            margin: 0 0 15px 0;
+        }
+
+        .designer-text {
+            color: #ffffff;
+            font-size: 1.2em; 
+            font-weight: 300;
+            margin-top: 10px;
+        }
+
+        .designer-text strong {
+            color: var(--primary-color);
+        }
+
+        /* User Info Bar */
+        .user-info-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .info-pill {
+            padding: 10px 20px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 500;
+            font-size: 1.05em;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-align: center;
+        }
+
+        .pill-location { background-color: #27ae60; }
+        .pill-email { background-color: #e67e22; }
+        .pill-counter { background-color: #2980b9; }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #0f6c65;
+            border-bottom: 2px solid #b2d8d2;
+            padding-bottom: 10px;
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+
+        .card h3 { color: #11786f; font-size: 1.2em; margin-top: 25px; }
+
+        /* Mandatory User Box */
+        .mandatory-box {
+            background-color: #fef9e7;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px dashed #f39c12;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        /* Form Controls */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-weight: 600; margin-bottom: 8px; color: #11786f; font-size: 1em; }
+        
+        input[type="number"], input[type="text"], input[type="date"] {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            border: 1px solid #b2d8d2;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1.1em;
+            background-color: var(--input-bg);
+            text-align: center; 
+            color: #0f172a;
+            font-weight: 500;
+        }
+        
+        input:focus { outline: none; border-color: #0f6c65; box-shadow: 0 0 0 2px rgba(15, 108, 101, 0.2); }
+        input::placeholder { color: #94a3b8; font-weight: 300; opacity: 1; }
+
+        /* Table */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            min-width: 600px; 
+        }
+
+        th, td { border: 1px solid #b2d8d2; padding: 10px; text-align: center; vertical-align: middle; }
+        th { background-color: #11786f; color: #ffffff; font-weight: 600; font-size: 1em; }
+        td input { padding: 8px; font-size: 1em; border-radius: 4px; }
+
+        /* Buttons Basic */
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight: 600; font-size: 1em; transition: 0.2s; }
+        .btn-add { background-color: var(--btn-add); color: white; margin-bottom: 10px; }
+        .btn-remove { background-color: var(--accent-color); color: white; padding: 6px 12px; font-size: 0.9em; }
+
+        /* Control Panel */
+        .control-panel {
+            background-color: #e9f5f3;
+            border: 1px solid #b2d8d2;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        .control-panel h4 {
+            color: #0f6c65;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.15em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-panel hr { border: 0; border-top: 1px dashed #b2d8d2; margin-bottom: 15px; }
+
+        .filename-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #fdfce3 !important; 
+            border: 1px solid #4caf50 !important;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #333 !important;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .btn-cp {
+            padding: 12px 10px;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            color: white;
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-cp:active { transform: scale(0.98); }
+
+        .btn-cp-save { background-color: #0f8b72; }
+        .btn-cp-load { background-color: #0583d2; }
+        .btn-cp-hist { background-color: #614336; }
+        .btn-cp-clear { background-color: #e23c3d; }
+        .btn-cp-print { background-color: #fbc02d; color: #000; }
+        .btn-cp-exit { background-color: #424242; }
+
+        #historyList {
+            display: none;
+            margin-top: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 0.95em;
+        }
+
+        .btn-calc-main {
+            background-color: #27ae60;
+            color: white;
+            font-size: 1.4em;
+            padding: 15px 40px;
+            display: block;
+            margin: 20px auto 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.4);
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            font-weight: bold;
+        }
+        .btn-calc-main:hover { background-color: #219a52; transform: translateY(-2px); }
+
+        /* Results Section */
+        .result-container { display: none; }
+        .output-table th { background-color: #11786f; color: white; }
+        .output-table .section-header td { background-color: #b2d8d2 !important; font-weight: bold; color: #0f172a; }
+        .output-table .highlight-row td { background-color: var(--result-highlight) !important; font-weight: bold; }
+        .text-right { text-align: right !important; }
+        .text-left { text-align: left !important; }
+        .percent-col { font-weight: bold; text-align: center !important; }
+
+        /* Assessment Box - Storytelling */
+        .assessment-box { 
+            background-color: #ffffff; 
+            border-radius: 12px; 
+            padding: 25px; 
+            margin-top: 25px; 
+            border: 2px solid #11786f; 
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 15px 10px; font-size: 14px; }
+            .header h1 { font-size: 1.8em; }
+            .header h3 { font-size: 1.1em; }
+            .designer-text { font-size: 1em; }
+            .info-pill { width: 100%; justify-content: center; font-size: 0.9em; padding: 8px; }
+            .card { padding: 15px; }
+            .control-grid { grid-template-columns: 1fr; } 
+            .filename-input { font-size: 1em; }
+            .btn-cp { padding: 10px; font-size: 0.95em; }
+            .btn-calc-main { font-size: 1.2em; padding: 12px; max-width: 100%; }
+        }
+
+        /* =========================================
+           Print CSS (จัดหน้ากระดาษแบบใหม่ให้กระชับและไม่แหว่ง)
+        ========================================= */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 10mm 15mm; /* ตั้งขอบกระดาษให้พอดี ป้องกันข้อมูลล้น */
+            }
+
+            body { 
+                background: #fff !important; 
+                color: #000 !important; 
+                padding: 0; 
+                font-size: 12pt;
+            }
+
+            /* ซ่อนเมนูและปุ่มที่ไม่จำเป็นเวลาพริ้นท์ */
+            .user-info-bar, .control-panel, .btn-calc-main, .btn-add, .btn-remove, 
+            th:last-child, td:last-child, .mandatory-box h4 {
+                display: none !important;
+            }
+
+            /* ลดระยะห่างส่วนหัวและเนื้อหา */
+            .header { 
+                background: #fff !important; 
+                box-shadow: none; 
+                border: none; 
+                color: #000; 
+                padding: 0; 
+                margin-bottom: 10px; 
+            }
+            .header h1 { color: #000 !important; text-shadow: none; font-size: 1.8em; margin-bottom: 5px; }
+            .header h1 span { color: #000 !important; }
+            .header h3 { color: #333 !important; text-shadow: none; font-size: 1.2em; margin-bottom: 5px; }
+            .designer-text { color: #333 !important; text-shadow: none; font-size: 1em; margin-top: 5px; }
+
+            /* ปรับ Card ไม่ให้กันพื้นที่ว่างใหญ่ๆ ยอมให้แบ่งหน้าได้ (auto) */
+            .card { 
+                background: #fff !important;
+                box-shadow: none; 
+                border: none; 
+                padding: 0; 
+                margin-bottom: 15px; 
+                page-break-inside: auto; 
+                break-inside: auto;
+            }
+
+            /* จัด Input Grid ให้เป็น 3 คอลัมน์บนหน้ากระดาษ เพื่อความกระชับ */
+            .form-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .mandatory-box {
+                border: 1px solid #ccc;
+                padding: 10px;
+                margin-bottom: 15px;
+                background: transparent !important;
+                box-shadow: none;
+            }
+
+            /* จัดฟอร์แมต input ตอนพิมพ์ให้เหมือนข้อความปกติ */
+            input { 
+                border: none !important; 
+                background: transparent !important; 
+                color: #000 !important; 
+                padding: 0 !important; 
+                font-size: 11pt;
+            }
+
+            input::placeholder { color: transparent !important; } /* ซ่อนคำว่า กรอกข้อมูล เวลาพริ้นท์ */
+
+            /* ตารางและการขึ้นหน้าใหม่ (ป้องกันแถวถูกตัดครึ่ง) */
+            table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                margin-bottom: 10px; 
+                page-break-inside: auto; 
+            }
+            
+            /* ล็อกการตัดแบ่งหน้าให้อยู่ในแถวเดียวกันเสมอ ป้องกันตารางขาดตอนกลางคำ */
+            tr, .form-group, li { 
+                page-break-inside: avoid !important; 
+                break-inside: avoid !important; 
+            }
+            
+            /* ไม่ให้หัวข้อโดดไปอยู่บรรทัดสุดท้ายของหน้า */
+            h2, h3 { 
+                page-break-after: avoid !important; 
+                break-after: avoid !important; 
+                margin-top: 15px; 
+                margin-bottom: 8px;
+            }
+
+            th, td { 
+                border: 1px solid #000 !important; 
+                padding: 6px !important; 
+                font-size: 11pt;
+            }
+            th { 
+                background-color: #f2f2f2 !important; 
+                color: #000 !important; 
+            }
+
+            .assessment-box {
+                border: 1px solid #000 !important;
+                padding: 15px !important;
+                margin-top: 15px;
+                page-break-inside: avoid; /* พยายามให้บทสรุปอยู่ในหน้าเดียวกัน */
+            }
+
+            /* บังคับพิมพ์สีพื้นหลัง สำหรับตารางและป้ายกำกับ */
+            .output-table .section-header td { background-color: #e0e0e0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .output-table .highlight-row td { background-color: #d1fae5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>โปรแกรมประเมินต้นทุนและผลตอบแทน<br><span>การเลี้ยงปลานิลแดงในกระชัง</span></h1>
+        <h3>(Red Tilapia Cage Culture Economic Analyzer)</h3>
+        <div class="designer-text">
+            ออกแบบและพัฒนาโปรแกรมโดย <strong>รศ.ดร.เจษฎา อิสเหาะ</strong>
+        </div>
+    </div>
+
+    <!-- User Info Bar -->
+    <div class="user-info-bar">
+        <div class="info-pill pill-location" id="locationDisplay">📍 อำเภอพระนครศรีอยุธยา, จังหวัดพระนครศรีอยุธยา, ประเทศไทย</div>
+        <div class="info-pill pill-email" id="emailDisplay">👤 ผู้ใช้: กำลังโหลด...</div>
+        <div class="info-pill pill-counter" id="counterDisplay">🌐 ผู้ใช้งานสะสมรวม: - ครั้ง</div>
+    </div>
+
+    <!-- Section 1: Data Entry -->
+    <div class="card" id="inputSection">
+        
+        <h2>ส่วนที่ 1: การประเมินข้อมูลประจำกระชัง (Input Data)</h2>
+
+        <!-- กล่องบังคับกรอกชื่อและวันที่ -->
+        <div class="mandatory-box">
+            <h4 style="margin-top: 0; color: #d35400; font-size: 1.15em; margin-bottom: 15px;">👤 ข้อมูลผู้ประเมิน (จำเป็นต้องระบุก่อนประมวลผล)</h4>
+            <div class="form-grid" style="margin-bottom: 0;">
+                <div class="form-group">
+                    <label style="color: #d35400;">ชื่อ-นามสกุล (ผู้บันทึกข้อมูล)</label>
+                    <input type="text" id="userName" placeholder="ระบุ ชื่อ-นามสกุล..." required style="border-color: #f39c12;">
+                </div>
+                <div class="form-group">
+                    <label style="color: #d35400;">วันที่บันทึกข้อมูล (วัน/เดือน/ปี)</label>
+                    <input type="date" id="recordDate" required style="border-color: #f39c12;">
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label>จำนวนกระชัง (กระชัง)</label>
+                <input type="number" id="numCages" value="" placeholder="กรอกข้อมูล" min="1">
+            </div>
+            <div class="form-group">
+                <label>ขนาดกระชัง กว้าง x ยาว x ลึก (เมตร)</label>
+                <input type="text" id="cageDimensions" value="" placeholder="กรอกข้อมูล (เช่น 5x10x2)">
+            </div>
+            <div class="form-group">
+                <label>ระยะเวลาการเลี้ยง (วัน)</label>
+                <input type="number" id="cultureDays" value="" placeholder="กรอกข้อมูล" min="1">
+            </div>
+            <div class="form-group">
+                <label>จำนวนปลาที่ปล่อยในกระชัง (ตัว/กระชัง)</label>
+                <input type="number" id="fishPerCage" value="" placeholder="กรอกข้อมูล">
+            </div>
+            <div class="form-group">
+                <label>ราคาลูกปลา/ตัว (บาท)</label>
+                <input type="number" id="pricePerFish" value="" placeholder="กรอกข้อมูล" step="0.10">
+            </div>
+            <div class="form-group">
+                <label>ขนาดปลาที่ปล่อย (กรัม)</label>
+                <input type="number" id="fishSize" value="" placeholder="กรอกข้อมูล">
+            </div>
+        </div>
+
+        <h3 style="margin-top: 25px;">รายการต้นทุนคงที่ ค่าเครื่องมืออุปกรณ์/เครื่องจักร</h3>
+        <button class="btn btn-add" onclick="addEquipmentRow()">+ เพิ่มรายการอุปกรณ์</button>
+        <div class="table-responsive">
+            <table id="equipmentTable">
+                <thead>
+                    <tr>
+                        <th width="40%">รายการ</th>
+                        <th width="15%">จำนวน (เครื่อง/ใบ)</th>
+                        <th width="20%">ราคา/หน่วย (บาท)</th>
+                        <th width="15%">อายุการใช้งาน (ปี)</th>
+                        <th width="10%">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" value="เครื่องให้อากาศ (Air Pump/Aerator)" class="eq-name"></td>
+                        <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-qty"></td>
+                        <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-price"></td>
+                        <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-life"></td>
+                        <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" value="กระชัง" class="eq-name"></td>
+                        <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-qty"></td>
+                        <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-price"></td>
+                        <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-life"></td>
+                        <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin-top: 25px;">รายการต้นทุนผันแปรอื่นๆ</h3>
+        <button class="btn btn-add" onclick="addCostRow()">+ เพิ่มรายการค่าใช้จ่าย</button>
+        <div class="table-responsive">
+            <table id="costTable">
+                <thead>
+                    <tr>
+                        <th width="60%">รายการค่าใช้จ่าย</th>
+                        <th width="30%">จำนวนเงิน (บาท/รุ่น)</th>
+                        <th width="10%">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" value="ค่าเช่าที่วางกระชังเลี้ยงปลา" class="cost-name"></td>
+                        <td><input type="number" value="" placeholder="กรอกข้อมูล" class="cost-amount"></td>
+                        <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" value="ค่าจ้างคนเลี้ยงปลา" class="cost-name"></td>
+                        <td><input type="number" value="" placeholder="กรอกข้อมูล" class="cost-amount"></td>
+                        <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" value="ค่าอาหารตลอดการเลี้ยง" class="cost-name"></td>
+                        <td><input type="number" value="" placeholder="กรอกข้อมูล" class="cost-amount"></td>
+                        <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" value="ค่าน้ำมัน" class="cost-name"></td>
+                        <td><input type="number" value="" placeholder="กรอกข้อมูล" class="cost-amount"></td>
+                        <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" value="ค่าไฟฟ้า (คำนวณเฉลี่ย 4.50 บาท/หน่วย)" class="cost-name"></td>
+                        <td><input type="number" value="" placeholder="กรอกข้อมูล" class="cost-amount"></td>
+                        <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" value="ค่ายา+สารเคมี+วิตามินซี และจุลินทรีย์" class="cost-name"></td>
+                        <td><input type="number" value="" placeholder="กรอกข้อมูล" class="cost-amount"></td>
+                        <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-grid" style="margin-top: 25px;">
+            <div class="form-group">
+                <label>ผลผลิตทั้งหมดที่ได้ (กิโลกรัม)</label>
+                <input type="number" id="totalYield" value="" placeholder="กรอกข้อมูล" step="1">
+            </div>
+            <div class="form-group">
+                <label>ราคาขายปลาเฉลี่ย (บาท/กิโลกรัม)</label>
+                <input type="number" id="sellPriceKg" value="" placeholder="กรอกข้อมูล" step="0.50"> 
+            </div>
+        </div>
+
+        <button class="btn btn-calc-main" onclick="calculateEconomics()">📊 คำนวณผลตอบแทน</button>
+
+        <!-- Control Panel (แผงปุ่มบันทึก/ล้าง/ออก) -->
+        <div class="control-panel">
+            <h4>⚙️ การจัดการและการบันทึกข้อมูล</h4>
+            <hr>
+            <input type="text" id="saveFilename" class="filename-input" placeholder="ตั้งชื่อไฟล์ก่อนบันทึก (เช่น วันที่ บ่อ1)">
+            
+            <input type="file" id="fileUpload" accept=".json" style="display: none;" onchange="loadDataFromFile(event)">
+
+            <div class="control-grid">
+                <button class="btn-cp btn-cp-save" onclick="saveDataToFile()">บันทึกข้อมูล (ลงเครื่อง + ประวัติ)</button>
+                <button class="btn-cp btn-cp-load" onclick="document.getElementById('fileUpload').click()">📂 โหลดข้อมูลจากไฟล์</button>
+                <button class="btn-cp btn-cp-hist" onclick="toggleHistory()">🕒 ดูประวัติย้อนหลัง</button>
+                <button class="btn-cp btn-cp-clear" onclick="clearData()">🧹 ล้างหน้าจอ</button>
+                <button class="btn-cp btn-cp-print" onclick="window.print()">🖨️ สั่งพิมพ์ / Save PDF</button>
+                <button class="btn-cp btn-cp-exit" onclick="exitProgram()">❌ ออกจากโปรแกรม</button>
+            </div>
+            
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <!-- Section 2: Results Display -->
+    <div class="card result-container" id="resultSection">
+        <h2 style="text-align: center;">ผลการประเมินข้อมูลและสรุปผลผลิต (Results & Evaluation)</h2>
+        
+        <div class="table-responsive">
+            <table class="output-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">รายการประเมิน</th>
+                        <th width="25%">จำนวนเงิน (บาท)</th>
+                        <th width="15%">ร้อยละ</th>
+                    </tr>
+                </thead>
+                <tbody id="resultBody">
+                    <!-- Data populated by JS -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Section 3: Assessment and Suggestions -->
+        <div class="assessment-box" id="assessmentBox">
+            <!-- Assessment populated by JS (Storytelling) -->
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ---------------- Keyboard Navigation (Arrow Keys) ----------------
+    document.addEventListener('keydown', function(e) {
+        const allowedKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+        if (!allowedKeys.includes(e.key)) return;
+
+        const currentInput = e.target;
+        if (currentInput.tagName === 'INPUT') {
+            
+            if (currentInput.type === 'number' && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+                e.preventDefault();
+            }
+
+            let targetInput = null;
+            const currentTd = currentInput.closest('td');
+
+            if (currentTd) {
+                const currentTr = currentTd.closest('tr');
+                const tbody = currentTr.closest('tbody');
+                if (!tbody) return;
+
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const rowIndex = rows.indexOf(currentTr);
+                const cells = Array.from(currentTr.querySelectorAll('td'));
+                const colIndex = cells.indexOf(currentTd);
+
+                if (e.key === 'ArrowUp' && rowIndex > 0) {
+                    const targetCell = rows[rowIndex - 1].querySelectorAll('td')[colIndex];
+                    if (targetCell) targetInput = targetCell.querySelector('input');
+                } else if (e.key === 'ArrowDown' && rowIndex < rows.length - 1) {
+                    const targetCell = rows[rowIndex + 1].querySelectorAll('td')[colIndex];
+                    if (targetCell) targetInput = targetCell.querySelector('input');
+                } else if (e.key === 'ArrowLeft') {
+                    let isAtStart = true;
+                    try { if (currentInput.type === 'text' && currentInput.selectionStart > 0) isAtStart = false; } catch(err){}
+                    if (isAtStart && colIndex > 0) {
+                        const targetCell = cells[colIndex - 1];
+                        if (targetCell) targetInput = targetCell.querySelector('input');
+                    }
+                } else if (e.key === 'ArrowRight') {
+                    let isAtEnd = true;
+                    try { if (currentInput.type === 'text' && currentInput.selectionEnd < currentInput.value.length) isAtEnd = false; } catch(err){}
+                    if (isAtEnd && colIndex < cells.length - 1) {
+                        const targetCell = cells[colIndex + 1];
+                        if (targetCell) targetInput = targetCell.querySelector('input');
+                    }
+                }
+            } else {
+                const allInputs = Array.from(document.querySelectorAll('#inputSection input:not([type="file"])'));
+                const index = allInputs.indexOf(currentInput);
+                
+                if (index !== -1) {
+                    let isAtStart = true;
+                    let isAtEnd = true;
+                    if (currentInput.type === 'text') {
+                        try {
+                            if (currentInput.selectionStart > 0) isAtStart = false;
+                            if (currentInput.selectionEnd < currentInput.value.length) isAtEnd = false;
+                        } catch(err){}
+                    }
+
+                    if (e.key === 'ArrowLeft' && isAtStart && index > 0) {
+                        targetInput = allInputs[index - 1];
+                    } else if (e.key === 'ArrowRight' && isAtEnd && index < allInputs.length - 1) {
+                        targetInput = allInputs[index + 1];
+                    } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                        const rect = currentInput.getBoundingClientRect();
+                        let closest = null;
+                        let minDistance = Infinity;
+
+                        allInputs.forEach(inp => {
+                            if (inp === currentInput) return;
+                            const r = inp.getBoundingClientRect();
+                            
+                            let distance = Infinity;
+                            if (e.key === 'ArrowUp' && r.bottom <= rect.top + 15) { 
+                                const dy = rect.top - r.bottom;
+                                const dx = Math.abs((r.left + r.width/2) - (rect.left + rect.width/2));
+                                distance = dy * 5 + dx; 
+                            } else if (e.key === 'ArrowDown' && r.top >= rect.bottom - 15) { 
+                                const dy = r.top - rect.bottom;
+                                const dx = Math.abs((r.left + r.width/2) - (rect.left + rect.width/2));
+                                distance = dy * 5 + dx;
+                            }
+
+                            if (distance < minDistance) {
+                                minDistance = distance;
+                                closest = inp;
+                            }
+                        });
+                        targetInput = closest;
+                    }
+                }
+            }
+
+            if (targetInput) {
+                e.preventDefault(); 
+                targetInput.focus();
+                try { targetInput.select(); } catch(err){} 
+            }
+        }
+    });
+
+    // ---------------- System Initialization ----------------
+    window.onload = async function() {
+        // Default Date to Today
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        document.getElementById('recordDate').value = `${yyyy}-${mm}-${dd}`;
+
+        // 1. Email
+        let email = localStorage.getItem("userEmail");
+        if (!email) {
+            email = prompt("ยินดีต้อนรับสู่โปรแกรม! กรุณากรอกอีเมลของคุณเพื่อบันทึกการเข้าใช้งาน:");
+            if (email && email.trim() !== "") {
+                localStorage.setItem("userEmail", email);
+            } else {
+                email = "ผู้ใช้งานทั่วไป";
+            }
+        }
+        document.getElementById("emailDisplay").innerText = `👤 ผู้ใช้: ${email}`;
+
+        // 2. Location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    let lat = position.coords.latitude;
+                    let lon = position.coords.longitude;
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=th`)
+                        .then(res => res.json())
+                        .then(data => {
+                            let addr = data.address;
+                            let district = addr.city_district || addr.county || addr.town || addr.suburb || addr.village || "";
+                            let province = addr.state || addr.province || addr.city || "";
+                            let country = addr.country || "ไทย";
+                            
+                            district = district.replace(/อำเภอ/g, '').replace(/องค์การบริหารส่วนตำบล/g, '').replace(/เทศบาลตำบล/g, '').replace(/เทศบาลเมือง/g, '').replace(/เทศบาลนคร/g, '').replace(/ตำบล/g, '').trim();
+                            province = province.replace(/จังหวัด/g, '').trim();
+                            country = country.replace(/ประเทศ/g, '').trim();
+                            
+                            if (district.includes('หันตรา') || district === 'พระนครศรีอยุธยา') {
+                                district = 'พระนครศรีอยุธยา'; province = 'พระนครศรีอยุธยา';
+                            }
+                            if (!district) district = 'พระนครศรีอยุธยา';
+                            if (!province) province = 'พระนครศรีอยุธยา';
+                            if (!country) country = 'ไทย';
+                            
+                            document.getElementById("locationDisplay").innerText = `📍 อำเภอ${district}, จังหวัด${province}, ประเทศ${country}`;
+                        })
+                        .catch(() => { document.getElementById("locationDisplay").innerText = "📍 อำเภอพระนครศรีอยุธยา, จังหวัดพระนครศรีอยุธยา, ประเทศไทย"; });
+                },
+                () => { document.getElementById("locationDisplay").innerText = "📍 อำเภอพระนครศรีอยุธยา, จังหวัดพระนครศรีอยุธยา, ประเทศไทย"; }
+            );
+        } else {
+            document.getElementById("locationDisplay").innerText = "📍 อำเภอพระนครศรีอยุธยา, จังหวัดพระนครศรีอยุธยา, ประเทศไทย";
+        }
+
+        // 3. Hybrid Counter System
+        let localCount = parseInt(localStorage.getItem("programUsageCount")) || 127;
+        let finalCount = localCount + 1; 
+        
+        try {
+            const namespace = "redtilapia_app_th";
+            const key = "global_visits";
+            const response = await fetch(`https://api.counterapi.dev/v1/${namespace}/${key}/up`);
+            const data = await response.json();
+            
+            if (data && data.count) {
+                if (data.count > finalCount) {
+                    finalCount = data.count;
+                }
+            }
+            document.getElementById("counterDisplay").innerText = `🌐 ผู้ใช้งานสะสมรวม: ${finalCount} ครั้ง`;
+        } catch (err) {
+            document.getElementById("counterDisplay").innerText = `🌐 ผู้ใช้งานสะสมรวม: ${finalCount} ครั้ง`;
+        }
+        localStorage.setItem("programUsageCount", finalCount);
+    };
+
+    // ---------------- Save / Load / Clear / Exit ----------------
+    function clearData() {
+        if(confirm("คุณต้องการล้างข้อมูลตารางทั้งหมด เพื่อเริ่มกรอกใหม่ใช่หรือไม่?\n(ชื่อผู้บันทึกและหน้าจอวันที่จะยังคงอยู่)")) {
+            document.getElementById('numCages').value = "";
+            document.getElementById('cageDimensions').value = "";
+            document.getElementById('cultureDays').value = "";
+            document.getElementById('fishPerCage').value = "";
+            document.getElementById('pricePerFish').value = "";
+            document.getElementById('fishSize').value = "";
+            document.getElementById('totalYield').value = "";
+            document.getElementById('sellPriceKg').value = "";
+            document.getElementById('saveFilename').value = "";
+
+            document.querySelector("#equipmentTable tbody").innerHTML = `
+                <tr>
+                    <td><input type="text" value="เครื่องให้อากาศ (Air Pump/Aerator)" class="eq-name"></td>
+                    <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-qty"></td>
+                    <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-price"></td>
+                    <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-life"></td>
+                    <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                </tr>
+                <tr>
+                    <td><input type="text" value="กระชัง" class="eq-name"></td>
+                    <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-qty"></td>
+                    <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-price"></td>
+                    <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-life"></td>
+                    <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                </tr>
+            `;
+
+            document.querySelector("#costTable tbody").innerHTML = `
+                <tr>
+                    <td><input type="text" value="ค่าเช่าที่วางกระชังเลี้ยงปลา" class="cost-name"></td>
+                    <td><input type="number" value="" placeholder="กรอกข้อมูล" class="cost-amount"></td>
+                    <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                </tr>
+                <tr>
+                    <td><input type="text" value="ค่าจ้างคนเลี้ยงปลา" class="cost-name"></td>
+                    <td><input type="number" value="" placeholder="กรอกข้อมูล" class="cost-amount"></td>
+                    <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                </tr>
+                <tr>
+                    <td><input type="text" value="ค่าอาหารตลอดการเลี้ยง" class="cost-name"></td>
+                    <td><input type="number" value="" placeholder="กรอกข้อมูล" class="cost-amount"></td>
+                    <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                </tr>
+                <tr>
+                    <td><input type="text" value="ค่าน้ำมัน" class="cost-name"></td>
+                    <td><input type="number" value="" placeholder="กรอกข้อมูล" class="cost-amount"></td>
+                    <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                </tr>
+                <tr>
+                    <td><input type="text" value="ค่าไฟฟ้า (คำนวณเฉลี่ย 4.50 บาท/หน่วย)" class="cost-name"></td>
+                    <td><input type="number" value="" placeholder="กรอกข้อมูล" class="cost-amount"></td>
+                    <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                </tr>
+                <tr>
+                    <td><input type="text" value="ค่ายา+สารเคมี+วิตามินซี และจุลินทรีย์" class="cost-name"></td>
+                    <td><input type="number" value="" placeholder="กรอกข้อมูล" class="cost-amount"></td>
+                    <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                </tr>
+            `;
+
+            document.getElementById('resultSection').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function exitProgram() {
+        if(confirm("คุณต้องการออกจากโปรแกรมใช่หรือไม่?")) {
+            window.close();
+            setTimeout(() => {
+                alert("เนื่องจากระบบของเบราว์เซอร์ กรุณากดเครื่องหมาย ❌ เพื่อปิดแท็บนี้ด้วยตนเองครับ");
+            }, 300);
+        }
+    }
+
+    function saveDataToFile() {
+        const userName = document.getElementById('userName').value.trim();
+        const recordDate = document.getElementById('recordDate').value;
+
+        if(!userName) {
+            alert("⚠️ กรุณากรอก ชื่อ-นามสกุล ของผู้บันทึกข้อมูลก่อนครับ");
+            document.getElementById('userName').focus();
+            return;
+        }
+        if(!recordDate) {
+            alert("⚠️ กรุณาระบุ วันที่บันทึกข้อมูล ให้ครบถ้วนครับ");
+            document.getElementById('recordDate').focus();
+            return;
+        }
+
+        let filename = document.getElementById('saveFilename').value.trim();
+        if(!filename) filename = "data_fish_" + new Date().getTime();
+        
+        const eqRows = [];
+        document.querySelectorAll("#equipmentTable tbody tr").forEach(row => {
+            eqRows.push({
+                name: row.querySelector('.eq-name').value,
+                qty: row.querySelector('.eq-qty').value,
+                price: row.querySelector('.eq-price').value,
+                life: row.querySelector('.eq-life').value
+            });
+        });
+
+        const costRows = [];
+        document.querySelectorAll("#costTable tbody tr").forEach(row => {
+            costRows.push({
+                name: row.querySelector('.cost-name').value,
+                amount: row.querySelector('.cost-amount').value
+            });
+        });
+
+        const dataObj = {
+            userName: userName,
+            recordDate: recordDate,
+            numCages: document.getElementById('numCages').value,
+            cageDimensions: document.getElementById('cageDimensions').value,
+            cultureDays: document.getElementById('cultureDays').value,
+            fishPerCage: document.getElementById('fishPerCage').value,
+            pricePerFish: document.getElementById('pricePerFish').value,
+            fishSize: document.getElementById('fishSize').value,
+            totalYield: document.getElementById('totalYield').value,
+            sellPriceKg: document.getElementById('sellPriceKg').value,
+            equipment: eqRows,
+            costs: costRows,
+            savedAt: new Date().toLocaleString('th-TH')
+        };
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataObj));
+        const downloadNode = document.createElement('a');
+        downloadNode.setAttribute("href", dataStr);
+        downloadNode.setAttribute("download", filename + ".json");
+        document.body.appendChild(downloadNode);
+        downloadNode.click();
+        downloadNode.remove();
+
+        let history = JSON.parse(localStorage.getItem('saveHistory')) || [];
+        history.unshift({ name: filename + ".json", date: dataObj.savedAt, data: dataObj });
+        localStorage.setItem('saveHistory', JSON.stringify(history));
+        
+        alert("บันทึกข้อมูลเรียบร้อย (โหลดเข้าเครื่องและจัดเก็บในประวัติแล้ว)");
+        
+        if(document.getElementById('historyList').style.display === 'block') {
+            renderHistory();
+        }
+    }
+
+    function populateForm(data) {
+        if(data.userName) document.getElementById('userName').value = data.userName;
+        if(data.recordDate) document.getElementById('recordDate').value = data.recordDate;
+
+        if(data.numCages) document.getElementById('numCages').value = data.numCages;
+        if(data.cageDimensions) document.getElementById('cageDimensions').value = data.cageDimensions;
+        if(data.cultureDays) document.getElementById('cultureDays').value = data.cultureDays;
+        if(data.fishPerCage) document.getElementById('fishPerCage').value = data.fishPerCage;
+        if(data.pricePerFish) document.getElementById('pricePerFish').value = data.pricePerFish;
+        if(data.fishSize) document.getElementById('fishSize').value = data.fishSize;
+        if(data.totalYield) document.getElementById('totalYield').value = data.totalYield;
+        if(data.sellPriceKg) document.getElementById('sellPriceKg').value = data.sellPriceKg;
+        
+        if(data.equipment && data.equipment.length > 0) {
+            const eqBody = document.querySelector("#equipmentTable tbody");
+            eqBody.innerHTML = '';
+            data.equipment.forEach(eq => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><input type="text" value="${eq.name}" class="eq-name"></td>
+                    <td><input type="number" value="${eq.qty || ''}" placeholder="กรอกข้อมูล" class="eq-qty"></td>
+                    <td><input type="number" value="${eq.price || ''}" placeholder="กรอกข้อมูล" class="eq-price"></td>
+                    <td><input type="number" value="${eq.life || ''}" placeholder="กรอกข้อมูล" class="eq-life"></td>
+                    <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                `;
+                eqBody.appendChild(tr);
+            });
+        }
+
+        if(data.costs && data.costs.length > 0) {
+            const costBody = document.querySelector("#costTable tbody");
+            costBody.innerHTML = '';
+            data.costs.forEach(c => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><input type="text" value="${c.name}" class="cost-name"></td>
+                    <td><input type="number" value="${c.amount || ''}" placeholder="กรอกข้อมูล" class="cost-amount"></td>
+                    <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+                `;
+                costBody.appendChild(tr);
+            });
+        }
+    }
+
+    function loadDataFromFile(event) {
+        const file = event.target.files[0];
+        if(!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                populateForm(data);
+                calculateEconomics();
+                alert("โหลดข้อมูลสำเร็จ! และรันผลการคำนวณให้แล้วครับ");
+            } catch(err) {
+                alert("เกิดข้อผิดพลาด: รูปแบบไฟล์ไม่ถูกต้อง หรือไม่ใช่ไฟล์ข้อมูลที่บันทึกจากโปรแกรมนี้");
+            }
+            document.getElementById('fileUpload').value = "";
+        };
+        reader.readAsText(file);
+    }
+
+    function loadHistoryItem(index) {
+        let history = JSON.parse(localStorage.getItem('saveHistory')) || [];
+        if(history[index] && history[index].data) {
+            populateForm(history[index].data);
+            calculateEconomics();
+            alert("ดึงข้อมูลจากประวัติ '" + history[index].name + "' มาแสดงผลสำเร็จ!");
+        } else {
+            alert("ไม่พบข้อมูลสำหรับการบันทึกรายการนี้");
+        }
+    }
+
+    function renderHistory() {
+        const div = document.getElementById('historyList');
+        let history = JSON.parse(localStorage.getItem('saveHistory')) || [];
+        
+        if(history.length === 0) {
+            div.innerHTML = "<div style='display:flex; justify-content:space-between;'><span>ยังไม่มีประวัติการบันทึกในอุปกรณ์นี้</span> <button onclick='toggleHistory()' style='background:#7f8c8d; color:white; border:none; border-radius:4px; padding:4px 10px; cursor:pointer;'>❌ ปิด</button></div>";
+        } else {
+            let html = `
+                <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 10px; flex-wrap: wrap; gap: 10px;'>
+                    <strong style="color: #11786f; font-size: 1.1em;">ประวัติการบันทึกข้อมูลล่าสุด</strong>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick='clearAllHistory()' style='background-color:#e74c3c; color:white; border:none; border-radius:4px; padding:6px 12px; cursor:pointer; font-size:0.9em;'>🗑️ ลบประวัติทั้งหมด</button>
+                        <button onclick='toggleHistory()' style='background-color:#7f8c8d; color:white; border:none; border-radius:4px; padding:6px 12px; cursor:pointer; font-size:0.9em;'>❌ ปิดหน้าต่าง</button>
+                    </div>
+                </div>
+                <ul style='margin:0; list-style-type: none; padding-left: 0;'>
+            `;
+            
+            history.forEach((h, index) => {
+                html += `
+                    <li style='margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 10px 12px; border-radius: 6px; border: 1px solid #e9ecef; flex-wrap: wrap; gap: 10px;'>
+                        <span><strong>${h.name}</strong> <span style="color: #7f8c8d; font-size: 0.9em;">(บันทึกเมื่อ: ${h.date})</span></span>
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick='loadHistoryItem(${index})' style='background-color:#3498db; color:white; border:none; border-radius:4px; padding:6px 12px; cursor:pointer; font-size:0.85em;'>📂 เรียกดู</button>
+                            <button onclick='deleteHistoryItem(${index})' style='background-color:#e74c3c; color:white; border:none; border-radius:4px; padding:6px 12px; cursor:pointer; font-size:0.85em;'>ลบ</button>
+                        </div>
+                    </li>
+                `;
+            });
+            html += "</ul>";
+            div.innerHTML = html;
+        }
+    }
+
+    function toggleHistory() {
+        const div = document.getElementById('historyList');
+        if(div.style.display === 'block') {
+            div.style.display = 'none';
+        } else {
+            renderHistory();
+            div.style.display = 'block';
+        }
+    }
+
+    function deleteHistoryItem(index) {
+        if(confirm("คุณต้องการลบประวัติรายการนี้ใช่หรือไม่?")) {
+            let history = JSON.parse(localStorage.getItem('saveHistory')) || [];
+            history.splice(index, 1);
+            localStorage.setItem('saveHistory', JSON.stringify(history));
+            renderHistory(); 
+        }
+    }
+
+    function clearAllHistory() {
+        if(confirm("คุณต้องการลบประวัติการบันทึกย้อนหลัง 'ทั้งหมด' ใช่หรือไม่?")) {
+            localStorage.removeItem('saveHistory');
+            renderHistory(); 
+        }
+    }
+
+    // ---------------- Dynamic Rows ----------------
+    function addEquipmentRow() {
+        const tbody = document.querySelector("#equipmentTable tbody");
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><input type="text" value="อุปกรณ์ใหม่" class="eq-name"></td>
+            <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-qty"></td>
+            <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-price"></td>
+            <td><input type="number" value="" placeholder="กรอกข้อมูล" class="eq-life"></td>
+            <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    function addCostRow() {
+        const tbody = document.querySelector("#costTable tbody");
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><input type="text" value="รายการใหม่" class="cost-name"></td>
+            <td><input type="number" value="" placeholder="กรอกข้อมูล" class="cost-amount"></td>
+            <td><button class="btn btn-remove" onclick="removeRow(this)">ลบ</button></td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    function removeRow(btn) {
+        const row = btn.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+    }
+
+    const formatCurr = (num) => { return new Intl.NumberFormat('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num); }
+    const formatDec = (num) => { return new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num); }
+
+    // ---------------- Calculation Logic ----------------
+    function calculateEconomics() {
+        const userNameInput = document.getElementById('userName');
+        const recordDateInput = document.getElementById('recordDate');
+
+        if (!userNameInput.value.trim()) {
+            alert("⚠️ กรุณากรอก ชื่อ-นามสกุล ของผู้บันทึกข้อมูลก่อนทำการคำนวณครับ");
+            userNameInput.focus();
+            return;
+        }
+        if (!recordDateInput.value) {
+            alert("⚠️ กรุณาระบุ วัน/เดือน/ปี ที่บันทึกข้อมูลครับ");
+            recordDateInput.focus();
+            return;
+        }
+
+        const userName = userNameInput.value.trim();
+        const recordDate = recordDateInput.value;
+
+        // ดึงค่ามาถ้าไม่ใส่ให้เป็น 0 (หรือ 1 ในกรณีของตัวหาร)
+        const numCages = parseFloat(document.getElementById('numCages').value) || 0;
+        const fishPerCage = parseFloat(document.getElementById('fishPerCage').value) || 0;
+        const pricePerFish = parseFloat(document.getElementById('pricePerFish').value) || 0;
+        const totalYield = parseFloat(document.getElementById('totalYield').value) || 0;
+        const sellPriceKg = parseFloat(document.getElementById('sellPriceKg').value) || 0;
+        
+        const totalFish = numCages * fishPerCage;
+        const cultureDays = parseFloat(document.getElementById('cultureDays').value) || 1; 
+        const runsPerYear = 365 / cultureDays; 
+
+        let totalFixedCost = 0;
+        let equipmentDepreciationTotal = 0; 
+        let equipmentInitialInvestment = 0; 
+        let rentCost = 0;
+        let totalVarCost = 0;
+        let fixedHtml = '';
+        let varHtml = '';
+
+        // 1. Calculate Equipment
+        const eqRows = document.querySelectorAll("#equipmentTable tbody tr");
+        eqRows.forEach(row => {
+            const name = row.querySelector('.eq-name').value;
+            const qty = parseFloat(row.querySelector('.eq-qty').value) || 0;
+            const price = parseFloat(row.querySelector('.eq-price').value) || 0;
+            const life = parseFloat(row.querySelector('.eq-life').value) || 1; 
+            
+            const totalEqPrice = qty * price;
+            equipmentInitialInvestment += totalEqPrice; 
+            
+            const depPerYear = totalEqPrice / life;
+            const depPerRun = depPerYear / runsPerYear; 
+            
+            equipmentDepreciationTotal += depPerRun;
+            fixedHtml += `
+                <tr>
+                    <td class="text-left" style="padding-left: 20px;">ค่าเสื่อม${name}</td>
+                    <td></td>
+                    <td class="text-right">${formatCurr(depPerRun)}</td>
+                    <td class="percent-col fixed-pct">0.00</td>
+                </tr>
+            `;
+        });
+
+        // 2. Add Fingerling Cost 
+        const fingerlingCost = totalFish * pricePerFish;
+        totalVarCost += fingerlingCost;
+        varHtml += `
+                <tr>
+                    <td class="text-left" style="padding-left: 20px;">ค่าพันธุ์ปลา</td>
+                    <td></td>
+                    <td class="text-right">${formatCurr(fingerlingCost)}</td>
+                    <td class="percent-col var-pct">0.00</td>
+                </tr>
+        `;
+
+        // 3. Costs
+        const costRows = document.querySelectorAll("#costTable tbody tr");
+        costRows.forEach(row => {
+            const name = row.querySelector('.cost-name').value;
+            const costValue = parseFloat(row.querySelector('.cost-amount').value) || 0;
+
+            if(name.includes('เช่าที่วางกระชัง') || name.includes('เช่าที่ดิน')) {
+                rentCost += costValue;
+                fixedHtml = `
+                    <tr>
+                        <td class="text-left" style="padding-left: 20px;">${name}</td>
+                        <td></td>
+                        <td class="text-right">${formatCurr(costValue)}</td>
+                        <td class="percent-col fixed-pct">0.00</td>
+                    </tr>
+                ` + fixedHtml;
+            } else {
+                totalVarCost += costValue;
+                varHtml += `
+                    <tr>
+                        <td class="text-left" style="padding-left: 20px;">${name}</td>
+                        <td></td>
+                        <td class="text-right">${formatCurr(costValue)}</td>
+                        <td class="percent-col var-pct">0.00</td>
+                    </tr>
+                `;
+            }
+        });
+
+        // 4. Opp. Costs
+        const fixedOppCost = equipmentDepreciationTotal * 0.05 * (cultureDays/365);
+        totalFixedCost = equipmentDepreciationTotal + rentCost + fixedOppCost;
+        
+        fixedHtml += `
+                <tr>
+                    <td class="text-left" style="padding-left: 20px;">ค่าเสียโอกาสการลงทุน (คงที่)</td>
+                    <td></td>
+                    <td class="text-right">${formatCurr(fixedOppCost)}</td>
+                    <td class="percent-col fixed-pct">0.00</td>
+                </tr>
+        `;
+
+        const varOppCost = totalVarCost * 0.05 * (cultureDays/365);
+        totalVarCost += varOppCost;
+        varHtml += `
+                <tr>
+                    <td class="text-left" style="padding-left: 20px;">ค่าเสียโอกาสเงินลงทุน (ผันแปร)</td>
+                    <td></td>
+                    <td class="text-right">${formatCurr(varOppCost)}</td>
+                    <td class="percent-col var-pct">0.00</td>
+                </tr>
+        `;
+
+        // 5. Totals
+        const totalCost = totalFixedCost + totalVarCost;
+        const totalRevenue = totalYield * sellPriceKg;
+        const profit = totalRevenue - totalCost;
+        const costPerKg = totalCost > 0 ? totalCost / (totalYield || 1) : 0;
+        const breakEvenPrice = totalCost > 0 ? totalCost / (totalYield || 1) : 0;
+        const profitPerKg = totalYield > 0 ? profit / totalYield : 0;
+
+        const roi = totalCost > 0 ? (profit / totalCost) * 100 : 0;
+        const bcRatio = totalCost > 0 ? (totalRevenue / totalCost) : 0;
+        
+        let paybackCycles = 0;
+        let paybackText = "";
+        
+        if (profit > 0) {
+            paybackCycles = equipmentInitialInvestment / profit; 
+            let totalPaybackDays = paybackCycles * cultureDays; 
+            
+            let pbMonths = Math.floor(totalPaybackDays / 30);
+            let pbDays = Math.round(totalPaybackDays % 30);
+            
+            let timeStr = "";
+            if (pbMonths > 0) timeStr += `${pbMonths} เดือน `;
+            if (pbDays > 0 || pbMonths === 0) timeStr += `${pbDays} วัน`;
+            
+            paybackText = `${timeStr} (หรือประมาณ ${formatDec(paybackCycles)} รุ่น)`;
+        } else {
+            paybackText = "ไม่สามารถประเมินได้ (ขาดทุน หรือยังไม่เกิดรายได้)";
+        }
+        
+        // 6. Build Result
+        const resultBody = document.getElementById('resultBody');
+        resultBody.innerHTML = `
+            <tr class="section-header">
+                <td colspan="2" class="text-left">ต้นทุนคงที่</td>
+                <td class="text-right">${formatCurr(totalFixedCost)}</td>
+                <td class="percent-col" id="totalFixedPct">0.00</td>
+            </tr>
+            ${fixedHtml}
+            
+            <tr class="section-header">
+                <td colspan="2" class="text-left">ต้นทุนผันแปร</td>
+                <td class="text-right">${formatCurr(totalVarCost)}</td>
+                <td class="percent-col" id="totalVarPct">0.00</td>
+            </tr>
+            ${varHtml}
+            
+            <tr class="highlight-row">
+                <td colspan="2" class="text-center" style="font-size: 1.1em;">ต้นทุนทั้งหมด (รวมทุกกระชัง)</td>
+                <td class="text-right" style="font-size: 1.1em;">${formatCurr(totalCost)}</td>
+                <td class="percent-col" style="font-size: 1.1em;">100.00</td>
+            </tr>
+            <tr class="section-header">
+                <td colspan="4" class="text-left">ผลผลิตทั้งหมดและผลตอบแทนทางเศรษฐศาสตร์</td>
+            </tr>
+            <tr>
+                <td class="text-left" style="padding-left: 20px;" colspan="2">ผลผลิตทั้งหมด (กิโลกรัม)</td>
+                <td class="text-right">${formatCurr(totalYield)}</td>
+                <td class="percent-col"></td>
+            </tr>
+            <tr>
+                <td class="text-left" style="padding-left: 20px;" colspan="2">จุดคุ้มทุนการผลิตต่อรุ่น (บาท/กก.)</td>
+                <td class="text-right">${formatDec(breakEvenPrice)}</td>
+                <td class="percent-col"></td>
+            </tr>
+            <tr class="highlight-row">
+                <td class="text-left" style="padding-left: 20px;" colspan="2">ขายปลาได้เงิน (บาท)</td>
+                <td class="text-right">${formatCurr(totalRevenue)}</td>
+                <td class="percent-col"></td>
+            </tr>
+            <tr>
+                <td class="text-left" style="padding-left: 20px;" colspan="2">กำไรสุทธิทั้งหมด (บาท)</td>
+                <td class="text-right" style="color: ${profit >= 0 ? '#27ae60' : '#c0392b'}; font-weight: bold;">${formatCurr(profit)}</td>
+                <td class="percent-col"></td>
+            </tr>
+            <tr>
+                <td class="text-left" style="padding-left: 20px;" colspan="2">ต้นทุนทั้งหมดต่อกิโลกรัม (บาท/กก.)</td>
+                <td class="text-right">${formatDec(costPerKg)}</td>
+                <td class="percent-col"></td>
+            </tr>
+            <tr>
+                <td class="text-left" style="padding-left: 20px;" colspan="2">กำไรสุทธิต่อกิโลกรัม (บาท/กก.)</td>
+                <td class="text-right" style="color: ${profitPerKg >= 0 ? '#27ae60' : '#c0392b'}; font-weight: bold;">${formatDec(profitPerKg)}</td>
+                <td class="percent-col"></td>
+            </tr>
+            
+            <tr class="section-header">
+                <td colspan="4" class="text-left" style="background-color: #d1fae5 !important;">ตัวชี้วัดทางการเงิน (Financial Indicators)</td>
+            </tr>
+            <tr>
+                <td class="text-left" style="padding-left: 20px;" colspan="2">อัตราผลตอบแทนต่อต้นทุน (%ROI)</td>
+                <td class="text-right" style="color: #0f6c65; font-weight: bold;">${formatDec(roi)} %</td>
+                <td class="percent-col"></td>
+            </tr>
+            <tr>
+                <td class="text-left" style="padding-left: 20px;" colspan="2">อัตราส่วนรายได้ต่อต้นทุน (B/C Ratio)</td>
+                <td class="text-right" style="color: #0f6c65; font-weight: bold;">${formatDec(bcRatio)}</td>
+                <td class="percent-col"></td>
+            </tr>
+            <tr>
+                <td class="text-left" style="padding-left: 20px;" colspan="2">ระยะเวลาคืนทุน (Payback Period)<br><small style="color: #64748b; font-weight: normal;">*ประเมินจากต้นทุนเครื่องมือ/อุปกรณ์</small></td>
+                <td class="text-right" style="color: #0f6c65; font-weight: bold;">${paybackText}</td>
+                <td class="percent-col"></td>
+            </tr>
+        `;
+
+        if (totalCost > 0) {
+            document.getElementById('totalFixedPct').innerText = formatDec((totalFixedCost/totalCost)*100);
+            document.getElementById('totalVarPct').innerText = formatDec((totalVarCost/totalCost)*100);
+            
+            document.querySelectorAll('.fixed-pct').forEach(td => {
+                const valStr = td.previousElementSibling.innerText.replace(/,/g, '');
+                const val = parseFloat(valStr);
+                td.innerText = formatDec((val / totalCost) * 100);
+            });
+            document.querySelectorAll('.var-pct').forEach(td => {
+                const valStr = td.previousElementSibling.innerText.replace(/,/g, '');
+                const val = parseFloat(valStr);
+                td.innerText = formatDec((val / totalCost) * 100);
+            });
+        }
+
+        // 7. Assessment Storytelling (เล่าเรื่อง + ไฮไลท์สี)
+        let gradeLabel = '';
+        let gradeBg = '';
+        let profitColor = profit >= 0 ? '#27ae60' : '#e74c3c';
+        let roiColor = '';
+        let bcColor = bcRatio > 1 ? '#27ae60' : '#e74c3c';
+
+        if (roi >= 30) {
+            gradeLabel = 'เกรด A (ดีเยี่ยม) - โซนสีเขียว';
+            gradeBg = '#27ae60';
+            roiColor = '#27ae60';
+        } else if (roi >= 15) {
+            gradeLabel = 'เกรด B (ดี) - โซนสีเขียว';
+            gradeBg = '#27ae60';
+            roiColor = '#27ae60';
+        } else if (roi > 0) {
+            gradeLabel = 'เกรด C (พอใช้) - โซนสีเหลือง';
+            gradeBg = '#f39c12';
+            roiColor = '#f39c12';
+        } else {
+            gradeLabel = 'เกรด D/F (ขาดทุน) - โซนสีแดง';
+            gradeBg = '#e74c3c';
+            roiColor = '#e74c3c';
+        }
+
+        let dateObj = new Date(recordDate);
+        let thaiDate = dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        let storytelling = `
+            <h2 style="text-align: left; color: #11786f; border-bottom: 2px solid #b2d8d2; padding-bottom: 10px; font-size: 1.4em; margin-top:0;">📝 บทสรุปและข้อเสนอแนะสำหรับคุณ ${userName}</h2>
+            
+            <p style="font-size: 1.1em; line-height: 1.8; color: #334155; margin-top: 15px;">
+                สวัสดีครับคุณ <strong>${userName}</strong>, <br>
+                จากการประมวลผลข้อมูลการเลี้ยงปลานิลแดงในกระชัง ที่คุณได้บันทึกไว้เมื่อวันที่ <strong>${thaiDate}</strong> เราขอสรุปผลการลงทุนให้ฟังง่ายๆ ดังนี้ครับ:
+            </p>
+
+            <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; border-left: 6px solid ${gradeBg}; margin: 20px 0; font-size: 1.15em; line-height: 1.8; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                การเลี้ยงปลารอบนี้ คุณใช้ <strong>เงินลงทุนทั้งหมด ${formatCurr(totalCost)} บาท</strong> และเมื่อจับปลาขายได้ผลผลิตรวม ${formatCurr(totalYield)} กิโลกรัม 
+                สร้าง <strong>รายได้กลับมา ${formatCurr(totalRevenue)} บาท</strong> 
+                <br><br>
+                เมื่อหักลบต้นทุนทั้งหมดแล้ว ผลปรากฏว่าคุณ <strong style="font-size: 1.4em; color: ${profitColor}; background: #fff; padding: 2px 8px; border-radius: 4px;">${profit >= 0 ? 'ได้กำไรสุทธิ' : 'ขาดทุนสุทธิ'} ${formatCurr(Math.abs(profit))} บาท</strong>
+            </div>
+
+            <p style="font-size: 1.1em; line-height: 1.8; color: #334155;">
+                เมื่อประเมินจากตัวชี้วัดทางการเงิน การลงทุนของคุณจัดอยู่ในระดับ <span style="background-color: ${gradeBg}; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; white-space: nowrap;">${gradeLabel}</span><br><br> 
+                เนื่องจากมี <strong>อัตราผลตอบแทน (ROI) อยู่ที่ <span style="color: ${roiColor}; font-size: 1.3em; font-weight: bold; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">${formatDec(roi)}%</span></strong> 
+                และมี <strong>สัดส่วนรายได้ต่อต้นทุน (B/C Ratio) เท่ากับ <span style="color: ${bcColor}; font-size: 1.3em; font-weight: bold; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">${formatDec(bcRatio)}</span></strong> <br>
+                <em>(หมายความว่าเงินลงทุน 1 บาท ได้คืนกลับมา ${formatDec(bcRatio)} บาท)</em>
+            </p>
+        `;
+
+        storytelling += `<h3 style="color: #1a365d; margin-top: 30px; font-size: 1.25em;">💡 คำแนะนำเพิ่มเติม:</h3>`;
+        storytelling += `<ul style="font-size: 1.1em; line-height: 1.8; color: #334155; background-color: #fef9e7; padding: 20px 20px 20px 40px; border-radius: 8px; border: 1px solid #fdebd0;">`;
+        
+        if (roi >= 30) {
+            storytelling += `<li style="margin-bottom: 10px;">🎉 <strong style="color: #27ae60;">ยอดเยี่ยมมากครับ!</strong> การบริหารจัดการต้นทุนของคุณ ไม่ว่าจะเป็นค่าอาหาร อัตรารอดตาย หรือการใช้พลังงาน อยู่ในเกณฑ์ที่มีประสิทธิภาพสูงมาก</li>`;
+            storytelling += `<li>📈 <strong>ก้าวต่อไป:</strong> แนะนำให้รักษามาตรฐานสูตรอาหารและการจัดการน้ำแบบนี้ไว้ และสามารถพิจารณาเพิ่มจำนวนกระชังหรือขยายฟาร์มได้อย่างปลอดภัยครับ</li>`;
+        } else if (roi >= 15) {
+            storytelling += `<li style="margin-bottom: 10px;">👍 <strong style="color: #27ae60;">ทำได้ดีครับ!</strong> ผลประกอบการของคุณอยู่ในเกณฑ์ที่ได้กำไรคุ้มเหนื่อย และมีความเสี่ยงต่ำ</li>`;
+            storytelling += `<li>🔍 <strong>จุดที่พัฒนาได้อีก:</strong> ลองตรวจสอบว่าสามารถลดต้นทุนค่าอาหารลงอีกนิด หรือหาแหล่งลูกปลาที่โตไวขึ้น เพื่อดันกำไรให้ทะลุ 30% ในรอบหน้าครับ</li>`;
+        } else if (roi > 0) {
+            storytelling += `<li style="margin-bottom: 10px;">⚠️ <strong style="color: #f39c12;">กำไรค่อนข้างบางครับ</strong> แม้จะไม่ขาดทุน แต่ก็เสี่ยงหากราคาปลาในตลาดตก หรือค่าอาหารขยับขึ้นเพียงเล็กน้อย</li>`;
+            storytelling += `<li>🛠️ <strong>สิ่งที่ต้องแก้:</strong> ต้องเจาะลึกที่ "ต้นทุนค่าอาหาร" ว่ามีการสูญเสียหรือปลาไม่กินอาหารมากไปหรือไม่ รวมถึงอัตรารอดตายของปลาที่อาจจะต่ำเกินไปครับ</li>`;
+        } else {
+            storytelling += `<li style="margin-bottom: 10px;">🚨 <strong style="color: #e74c3c;">เข้าขั้นวิกฤตครับ</strong> การเลี้ยงรอบนี้ประสบภาวะขาดทุนอย่างชัดเจน ซึ่งอาจเกิดจากโรคระบาด (ปลาตายเยอะ) หรือต้นทุนทะลุเพดานจนราคาขายรับไม่ไหว</li>`;
+            storytelling += `<li>🛑 <strong>ทางออกด่วน:</strong> หยุดการขยายฟาร์มชั่วคราว ทบทวนสาเหตุหลักที่ทำให้ต้นทุนบานปลาย และปรึกษานักวิชาการประมงเพื่อปรับปรุงระบบการเลี้ยงอย่างเร่งด่วนก่อนลงปลาชุดใหม่ครับ</li>`;
+        }
+        
+        if(profit > 0) {
+            storytelling += `<li style="margin-top: 10px;">⏳ <strong>ระยะเวลาคืนทุน:</strong> หากคุณทำผลงานได้แบบนี้ไปเรื่อยๆ จะใช้เวลา <strong>${paybackText}</strong> ในการคืนทุนค่าเครื่องมือและอุปกรณ์ตั้งต้นครับ</li>`;
+        }
+        storytelling += `</ul>`;
+
+        const assessmentBox = document.getElementById('assessmentBox');
+        assessmentBox.innerHTML = storytelling;
+
+        document.getElementById('resultSection').style.display = 'block';
+        document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
